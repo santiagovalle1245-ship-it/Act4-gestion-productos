@@ -1,0 +1,32 @@
+name: Integracion Continua (CI)
+
+# Esto le dice al robot que se active cada vez que hagamos un 'push' a la rama 'main'
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # El robot usará una computadora virtual con Linux
+
+    steps:
+    # 1. El robot descarga tu código
+    - name: Descargar codigo
+      uses: actions/checkout@v3
+
+    # 2. El robot instala Node.js
+    - name: Instalar Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+
+    # 3. El robot instala las herramientas (librerías)
+    - name: Instalar dependencias
+      run: npm install
+
+    # 4. El robot ejecuta tus pruebas de Jest, usando los secretos que guardaste en GitHub
+    - name: Ejecutar pruebas automatizadas
+      env:
+        MONGO_URI: ${{ secrets.MONGO_URI }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      run: npm test
