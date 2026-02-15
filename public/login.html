@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Gestión de Productos</title>
+    <style>
+        /* Usamos CSS Flexbox para centrar todo en la pantalla */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        /* Estilos para la tarjeta del formulario */
+        .login-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+        .login-container h2 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Para que el padding no rompa el ancho */
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        /* Mensaje de error oculto por defecto */
+        #mensaje-error {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Iniciar Sesión</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Correo Electrónico:</label>
+                <input type="email" id="email" required placeholder="juan@correo.com">
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" required placeholder="mypassword123">
+            </div>
+            <button type="submit">Entrar</button>
+            <p id="mensaje-error"></p>
+        </form>
+    </div>
+
+    <script>
+        // 1. Se selecciona el formulario usando su ID
+        const loginForm = document.getElementById('loginForm');
+        const mensajeError = document.getElementById('mensaje-error');
+
+        // 2. Se escucha el evento 'submit' (cuando el usuario hace clic en Entrar)
+        loginForm.addEventListener('submit', async (evento) => {
+            // Evita que la página se recargue (comportamiento por defecto)
+            evento.preventDefault();
+
+            // Captura los valores que el usuario escribió
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // 3. Hace una petición POST a nuestro propio servidor (Backend)
+                // Usa la API Fetch nativa de JavaScript
+                const respuesta = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json' // Le decimos que enviamos JSON
+                    },
+                    body: JSON.stringify({ email, password }) // Convertimos los datos a texto JSON
+                });
+
+                const data = await respuesta.json();// Convertimos la respuesta del servidor a un objeto de JavaScript
+
+                // 4. Verificamos si el login fue exitoso (Status 200)
+                if (respuesta.ok) {
+                    //Guarda el Token en el almacenamiento del navegador (localStorage)
+                    localStorage.setItem('token', data.token);
+                    // Guarda el gafete en la cartera del usuario
+                    alert('¡Login exitoso! Token guardado en tu navegador.');
+                    mensajeError.style.display = 'none';
+                                    
+                    
+                } else {
+                    // Si el login falla, mostramos el mensaje de error que nos dio el servidor
+                    mensajeError.textContent = data.mensaje;
+                    mensajeError.style.display = 'block';
+                }
+
+            } catch (error) {
+                console.error('Error en la petición:', error);
+                mensajeError.textContent = 'Error al conectar con el servidor';
+                mensajeError.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# Ignoramos la carpeta de dependencias (Vercel la instalará por su cuenta)
+node_modules/
+
+# ¡SÚPER IMPORTANTE! Ignoramos el archivo con nuestras variables secretas
+.env
+
+# Ignoramos archivos de sistema operativo que a veces se crean solos
+.DS_Store
