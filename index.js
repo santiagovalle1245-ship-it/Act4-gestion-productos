@@ -10,6 +10,8 @@ connectDB();// Ejecutamos la función para conectarnos a la base de datos
 
 app.use(express.json());// Middleware: Le decimos a Express que entienda los datos en formato JSON
 
+app.use(express.static('public'));
+
 app.use('/api/auth', require('./routes/authRoutes'));// Rutas de la aplicación
 
 app.use('/api/products', require('./routes/productRoutes'));// Rutas de productos, protegidas por el middleware de autenticación (authMiddleware)
