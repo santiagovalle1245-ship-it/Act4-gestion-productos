@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Gestión de Productos</title>
     <style>
-        /* Usamos CSS Flexbox para centrar todo en la pantalla */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f9;
@@ -15,7 +14,6 @@
             height: 100vh;
             margin: 0;
         }
-        /* Estilos para la tarjeta del formulario */
         .login-container {
             background-color: white;
             padding: 30px;
@@ -40,7 +38,7 @@
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            box-sizing: border-box; /* Para que el padding no rompa el ancho */
+            box-sizing: border-box; 
         }
         button {
             width: 100%;
@@ -55,7 +53,6 @@
         button:hover {
             background-color: #0056b3;
         }
-        /* Mensaje de error oculto por defecto */
         #mensaje-error {
             color: red;
             text-align: center;
@@ -84,39 +81,31 @@
     </div>
 
     <script>
-        // 1. Se selecciona el formulario usando su ID
         const loginForm = document.getElementById('loginForm');
         const mensajeError = document.getElementById('mensaje-error');
 
-        // 2. Se escucha el evento 'submit' (cuando el usuario hace clic en Entrar)
         loginForm.addEventListener('submit', async (evento) => {
-            // Evita que la página se recargue (comportamiento por defecto)
             evento.preventDefault();
 
-            // Captura los valores que el usuario escribió
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
             try {
-                // 3. Hace una petición POST a nuestro propio servidor (Backend)
-                // Usa la API Fetch nativa de JavaScript
                 const respuesta = await fetch('/api/auth/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json' // Le decimos que enviamos JSON
-                    },
-                    body: JSON.stringify({ email, password }) // Convertimos los datos a texto JSON
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
                 });
 
-                const data = await respuesta.json();// Convertimos la respuesta del servidor a un objeto de JavaScript
+                const data = await respuesta.json();
 
-                // 4. Verificamos si el login fue exitoso (Status 200)
                 if (respuesta.ok) {
-                    localStorage.setItem('token', data.token); // Guardamos el token
-                    window.location.href = 'dashboard.html'; // Nos manda a la tabla de productos
+                    // Agregamos este console.log para verificar que el token SÍ está llegando
+                    console.log("Token recibido del servidor:", data.token); 
+                    localStorage.setItem('token', data.token); 
+                    window.location.href = 'dashboard.html'; 
                     
                 } else {
-                    // Si el login falla, mostramos el mensaje de error que nos dio el servidor
                     mensajeError.textContent = data.mensaje;
                     mensajeError.style.display = 'block';
                 }
@@ -130,7 +119,3 @@
     </script>
 </body>
 </html>
-
-
-
-

@@ -37,75 +37,68 @@
     </table>
 
     <script>
-        // Esta función busca el token en el almacenamiento en el momento exacto que se necesita
-    function obtenerToken() {
-        const t = localStorage.getItem('token');
-        if (!t) {
-            console.error("Token no encontrado en localStorage");
-        }
-        return t;
-    }
-
-    async function cargarProductos() {
-        const tokenActual = obtenerToken();
-        if (!tokenActual) {
-            alert("No hay sesión activa. Regresando al Login...");
+        // 1. Verificación inmediata al entrar: si no hay token, lo mandamos al login al instante
+        const token = localStorage.getItem('token');
+        
+        if (!token || token === "undefined") {
+            console.error("TOKEN PERDIDO O INVÁLIDO");
+            alert("Tu sesión no es válida. Por favor inicia sesión de nuevo.");
             window.location.href = 'login.html';
-            return;
         }
 
-        try {
-            const res = await fetch('/api/products', {
-                headers: { 'Authorization': `Bearer ${tokenActual}` }
-            });
-            
-            const productos = await res.json();
-            if (res.ok) {
+        async function cargarProductos() {
+            try {
+                const res = await fetch('/api/products', {
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
+                
+                // Si el servidor nos rechaza (401), lanzamos un error para ir al login
+                if (res.status === 401) throw new Error("Sesión expirada");
+
+                const productos = await res.json();
                 const cuerpoTabla = document.querySelector('#tablaProductos tbody');
                 cuerpoTabla.innerHTML = ""; 
+                
                 productos.forEach(p => {
                     cuerpoTabla.innerHTML += `<tr><td>${p.name}</td><td>${p.description}</td><td>$${p.price}</td></tr>`;
                 });
-            } else {
-                console.log("Error al cargar lista:", productos.mensaje);
+            } catch (e) {
+                console.log("Sesión inválida o error, redirigiendo...");
+                window.location.href = 'login.html';
             }
-        } catch (e) { console.log("Error de conexión"); }
-    }
-
-    async function agregarProducto() {
-        const tokenActual = obtenerToken(); // Validamos el token justo antes de guardar
-        const name = document.getElementById('nombre').value;
-        const description = document.getElementById('desc').value;
-        const price = document.getElementById('precio').value;
-
-        if (!name || !price) {
-            alert("Por favor llena los campos obligatorios.");
-            return;
         }
 
-        try {
+        async function agregarProducto() {
+            const name = document.getElementById('nombre').value;
+            const description = document.getElementById('desc').value;
+            const price = document.getElementById('precio').value;
+
+            if (!name || !price) {
+                alert("Por favor llena el nombre y el precio.");
+                return;
+            }
+
             const res = await fetch('/api/products', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${tokenActual}` 
+                    'Authorization': `Bearer ${token}` 
                 },
                 body: JSON.stringify({ name, description, price: Number(price) })
             });
 
-            const data = await res.json();
             if (res.ok) {
-                alert("¡Producto guardado!");
-                cargarProductos();
+                alert("¡Guardado en MongoDB!");
+                cargarProductos(); // Refrescamos la tabla
             } else {
-                // Si sale el error de "No hay token", lo veremos aquí
-                alert("Error: " + (data.mensaje || "Token inválido o expirado"));
+                const error = await res.json();
+                alert("Error: " + (error.mensaje || "No se pudo guardar"));
                 if (res.status === 401) window.location.href = 'login.html';
             }
-        } catch (e) { alert("Error de red"); }
-    }
+        }
 
-    cargarProductos();
+        // Cargamos la tabla apenas abre la página
+        cargarProductos();
     </script>
 </body>
 </html>
