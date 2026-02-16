@@ -112,12 +112,8 @@
 
                 // 4. Verificamos si el login fue exitoso (Status 200)
                 if (respuesta.ok) {
-                    //Guarda el Token en el almacenamiento del navegador (localStorage)
-                    localStorage.setItem('token', data.token);
-                    // Guarda el gafete en la cartera del usuario
-                    alert('¡Login exitoso! Token guardado en tu navegador.');
-                    mensajeError.style.display = 'none';
-                                    
+                    localStorage.setItem('token', data.token); // Guardamos el token
+                    window.location.href = 'dashboard.html'; // Nos manda a la tabla de productos
                     
                 } else {
                     // Si el login falla, mostramos el mensaje de error que nos dio el servidor
