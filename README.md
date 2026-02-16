@@ -24,6 +24,6 @@ Iniciar el servidor: Ejecuta npm run dev para levantar la API mediante Nodemon. 
 
 3. Acceso a la aplicación en vivo (Despliegue en Vercel): Para evaluar el funcionamiento de la aplicación en la nube de forma rápida y sin necesidad de instalación local, puede acceder directamente a la vista del cliente (Frontend) a través del siguiente enlace oficial: 
 
-Enlace de la aplicación: https://act4-gestion-productos.vercel.app/login.html 
+Enlace de la aplicación: https://act4-gestion-productos.vercel.app/register.html 
 
 Esta vista estática se comunica de forma exitosa con la API Serverless desplegada en Vercel y persiste los datos en el clúster remoto de MongoDB Atlas 
