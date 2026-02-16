@@ -1,25 +1,25 @@
-const jwt = require('jsonwebtoken');// Importamos jsonwebtoken para poder "leer" y verificar el gafete
+const jwt = require('jsonwebtoken');
 
-// Exportamos la función del guardia de seguridad
 module.exports = function(req, res, next) {
-    
-    const token = req.header('x-auth-token');// 1. El guardia pide el gafete. Lo busca en la cabecera (header) de la petición
+    // 1. Buscamos el token en la cabecera 'Authorization' (formato moderno)
+    let token = req.header('Authorization');
 
-    if (!token) {
-        return res.status(401).json({ mensaje: 'No hay token, permiso denegado' });// 2. Si el usuario no trae gafete (token), le negamos la entrada
+    // 2. Limpiamos la palabra "Bearer " si viene en el texto
+    if (token && token.startsWith('Bearer ')) {
+        token = token.slice(7, token.length).trimLeft();
     }
 
-    // 3. Si trae gafete, el guardia saca su escáner para verificar que sea auténtico
+    // Si aún así no hay token (o si en el paso 1 no se encontró nada), denegamos el acceso
+    if (!token) {
+        return res.status(401).json({ mensaje: 'No hay token, permiso denegado' });
+    }
+
     try {
-        const cifrado = jwt.verify(token, process.env.JWT_SECRET);// Verificamos el token usando nuestra palabra secreta del archivo .env
-        
-        // Si es válido, extraemos los datos del usuario (su ID) y se los pegamos a la petición (req)
-        // Así, los "cocineros" (controladores) sabrán exactamente qué usuario está haciendo la petición
+        // 3. Verificamos la pulsera con el escáner
+        const cifrado = jwt.verify(token, process.env.JWT_SECRET);
         req.user = cifrado.user;
-        
-        next(); // Le decimos al guardia: "Todo en orden, déjalo pasar a la siguiente función"
-        
+        next(); 
     } catch (error) {
-        res.status(401).json({ mensaje: 'Token no válido' });// Si el escáner detecta que el token es falso o ya caducó, lo rebotamos
+        res.status(401).json({ mensaje: 'Token no válido' });
     }
 };
