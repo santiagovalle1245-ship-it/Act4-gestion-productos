@@ -33,7 +33,7 @@
             </tr>
         </thead>
         <tbody>
-            </tbody>
+        </tbody>
     </table>
 
     <script>
@@ -49,7 +49,8 @@
             cuerpoTabla.innerHTML = ""; // Limpiar tabla
             
             productos.forEach(p => {
-                cuerpoTabla.innerHTML += `<tr><td>${p.nombre}</td><td>${p.descripcion}</td><td>$${p.precio}</td></tr>`;
+                // Ajuste: Se usan los nombres de campos en inglés para coincidir con Atlas
+                cuerpoTabla.innerHTML += `<tr><td>${p.name}</td><td>${p.description}</td><td>$${p.price}</td></tr>`;
             });
         }
 
@@ -65,7 +66,8 @@
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}` 
                 },
-                body: JSON.stringify({ nombre, descripcion, precio })
+                // Ajuste: Se mapean los datos a las llaves 'name', 'description' y 'price'
+                body: JSON.stringify({ name: nombre, description: descripcion, price: precio })
             });
             
             alert("Producto guardado!");
