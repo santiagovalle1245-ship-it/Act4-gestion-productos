@@ -37,72 +37,72 @@
     </table>
 
     <script>
-        const token = localStorage.getItem('token'); 
-
-    // 1. Función para cargar productos con manejo de errores
-    async function cargarProductos() {
-        try {
-            const res = await fetch('/api/products', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (!res.ok) {
-                console.error("Error del servidor al cargar:", res.status);
-                return;
-            }
-
-            const productos = await res.json();
-            // Verificamos si lo que llegó es una lista (Array)
-            if (!Array.isArray(productos)) {
-                console.log("No se recibieron productos o el formato es incorrecto");
-                return;
-            }
-
-            const cuerpoTabla = document.querySelector('#tablaProductos tbody');
-            cuerpoTabla.innerHTML = ""; 
-            
-            productos.forEach(p => {
-                cuerpoTabla.innerHTML += `<tr><td>${p.name}</td><td>${p.description}</td><td>$${p.price}</td></tr>`;
-            });
-        } catch (error) {
-            console.error("Error de conexión:", error);
+        // Esta función busca el token en el almacenamiento en el momento exacto que se necesita
+    function obtenerToken() {
+        const t = localStorage.getItem('token');
+        if (!t) {
+            console.error("Token no encontrado en localStorage");
         }
+        return t;
     }
 
-    // 2. Función para agregar producto con verificación real
+    async function cargarProductos() {
+        const tokenActual = obtenerToken();
+        if (!tokenActual) {
+            alert("No hay sesión activa. Regresando al Login...");
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/products', {
+                headers: { 'Authorization': `Bearer ${tokenActual}` }
+            });
+            
+            const productos = await res.json();
+            if (res.ok) {
+                const cuerpoTabla = document.querySelector('#tablaProductos tbody');
+                cuerpoTabla.innerHTML = ""; 
+                productos.forEach(p => {
+                    cuerpoTabla.innerHTML += `<tr><td>${p.name}</td><td>${p.description}</td><td>$${p.price}</td></tr>`;
+                });
+            } else {
+                console.log("Error al cargar lista:", productos.mensaje);
+            }
+        } catch (e) { console.log("Error de conexión"); }
+    }
+
     async function agregarProducto() {
-        const nombre = document.getElementById('nombre').value;
-        const descripcion = document.getElementById('desc').value;
-        const precio = document.getElementById('precio').value;
+        const tokenActual = obtenerToken(); // Validamos el token justo antes de guardar
+        const name = document.getElementById('nombre').value;
+        const description = document.getElementById('desc').value;
+        const price = document.getElementById('precio').value;
+
+        if (!name || !price) {
+            alert("Por favor llena los campos obligatorios.");
+            return;
+        }
 
         try {
             const res = await fetch('/api/products', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
+                    'Authorization': `Bearer ${tokenActual}` 
                 },
-                // IMPORTANTE: Convertimos el precio a Número real para MongoDB
-                body: JSON.stringify({ 
-                    name: nombre, 
-                    description: descripcion, 
-                    price: Number(precio) 
-                })
+                body: JSON.stringify({ name, description, price: Number(price) })
             });
 
             const data = await res.json();
-
             if (res.ok) {
-                alert("¡Guardado exitosamente en la nube!");
-                cargarProductos(); 
+                alert("¡Producto guardado!");
+                cargarProductos();
             } else {
-                // Si el servidor rechaza, nos dirá por qué (ej. Token inválido)
-                alert("El servidor rechazó el producto: " + (data.mensaje || "Error desconocido"));
-                console.log("Detalle del error:", data);
+                // Si sale el error de "No hay token", lo veremos aquí
+                alert("Error: " + (data.mensaje || "Token inválido o expirado"));
+                if (res.status === 401) window.location.href = 'login.html';
             }
-        } catch (error) {
-            alert("Error de red: No se pudo contactar al servidor.");
-        }
+        } catch (e) { alert("Error de red"); }
     }
 
     cargarProductos();
